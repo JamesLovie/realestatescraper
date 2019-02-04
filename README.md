@@ -7,4 +7,10 @@ You can adjust the query to add/subtract specific suburbs, price range, surround
 
 Uses pandas to create a dataframe and export to a csv file.
 
-Addtional work to be completed: To append dataframe with existing data to create one whole database that only adds new entries and removes duplicate listing data. Parses suburb into another col in the dataframe and to geotag address from Google Maps API to have coordinates data with each row for historical prices.
+Addtional work to be completed: 
+
+To append dataframe with existing data to create one whole database that only adds new entries and removes duplicate listing data (DONE). 
+
+Parses suburb into another col in the dataframe and,
+
+Geotag address from Google Maps API to have coordinates data with each row for historical prices.
