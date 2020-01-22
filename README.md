@@ -1,5 +1,5 @@
 # realestatescraper
-A simple realestate.com.au web scraper build in python (requests, beautifulsoup, pandas).
+A simple real estate web scraper build in python (requests, beautifulsoup, pandas).
 
 A simple tool to extract price address and URL links for each property on a specific URL query.
 
