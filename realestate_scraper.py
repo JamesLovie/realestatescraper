@@ -25,103 +25,113 @@ bathroomsDF = []
 buildtypesDF = []
 date = str(date.today())
 
-try:
+# Class names should follow the UpperCaseCamelCase convention.
+class WebScraper:
 
-	# Loop through first 50 pages each day and add results to dataframe at completion.
-	for count in range(1, 51):
+	# Constructor: Instance variable names should be all lower case.
+	def __init__(self, target_url):
+		self.target_url = target_url
 
-		countstr = str(count)
-		# Insert your desired real estate website here.
-		page_link = 'https://www.target_url' + countstr + '?'
+	def scrape_pages(self):
+		try:
 
-		page_response = requests.get(page_link, timeout=5)
+			# Loop through first 50 pages each day and add results to dataframe at completion.
+			for count in range(1, 51):
 
-		page_content = BeautifulSoup(page_response.content, "html.parser")
+				countstr = str(count)
+				# Insert your desired real estate website here.
+				page_link = self.target_url + countstr + '?'
 
-		html = page_content.prettify("utf-8")
+				page_response = requests.get(page_link, timeout=5)
 
-		# Set the soup variable to html in bs4.
-		soup = BeautifulSoup(html, "html.parser")
+				page_content = BeautifulSoup(page_response.content, "html.parser")
 
-		# Parse the bedrooms for each property on the nth page.
+				html = page_content.prettify("utf-8")
 
-		for span in soup.find_all('span', attrs={"class":"general-features__icon general-features__beds"}):
-			bedrooms.append(span)
+				# Set the soup variable to html in bs4.
+				soup = BeautifulSoup(html, "html.parser")
 
-		# Parse the buildtype for each property on the nth page.
+				# Parse the bedrooms for each property on the nth page.
 
-		for span in soup.find_all('span', attrs={"class":"residential-card__property-type"}):
-			buildtypes.append(span)
+				for span in soup.find_all('span', attrs={"class":"general-features__icon general-features__beds"}):
+					bedrooms.append(span)
 
-		# Parse the bathrooms for each property on the nth page.
+				# Parse the buildtype for each property on the nth page.
 
-		for span in soup.find_all('span', attrs={"class":"general-features__icon general-features__baths"}):
-			bathrooms.append(span)
+				for span in soup.find_all('span', attrs={"class":"residential-card__property-type"}):
+					buildtypes.append(span)
 
-		# Parse the prices for each property on the nth page.
+				# Parse the bathrooms for each property on the nth page.
 
-		for span in soup.find_all('span', attrs={"class":"property-price "}):
-			prices.append(span)
+				for span in soup.find_all('span', attrs={"class":"general-features__icon general-features__baths"}):
+					bathrooms.append(span)
 
-		# Parse the urls for each property on nth page.
+				# Parse the prices for each property on the nth page.
 
-		for a in soup.find_all('a', attrs={"class":"details-link residential-card__details-link"}, href=True):
-		    urls.append(a['href'])
+				for span in soup.find_all('span', attrs={"class":"property-price "}):
+					prices.append(span)
 
-		# Parse the address for each property on nth page.
+				# Parse the urls for each property on nth page.
 
-		for a in soup.find_all('a', attrs={"class":"details-link residential-card__details-link"}):
-			addresses.append(a)
+				for a in soup.find_all('a', attrs={"class":"details-link residential-card__details-link"}, href=True):
+					urls.append(a['href'])
 
-		print('Page: ' + countstr + ' Scraped')
+				# Parse the address for each property on nth page.
 
-		# Sleep to avoid hitting the website too quickly.
-		time.sleep(5)
-	# Clean tags from prices data.
+				for a in soup.find_all('a', attrs={"class":"details-link residential-card__details-link"}):
+					addresses.append(a)
 
-	for price in prices:
-		priceDF.append(price.text)
+				print('Page: ' + countstr + ' Scraped')
 
-	# Clean tags from address data.
+				# Sleep to avoid hitting the website too quickly.
+				time.sleep(5)
+			# Clean tags from prices data.
 
-	for address in addresses:
-		addressDF.append(address.text)
+			for price in prices:
+				priceDF.append(price.text)
 
-	# Clean tags from buildtype data.
+			# Clean tags from address data.
 
-	for buildtype in buildtypes:
-		buildtypesDF.append(buildtype.text)
+			for address in addresses:
+				addressDF.append(address.text)
 
-	# Clean tags from bedrooms data.
+			# Clean tags from buildtype data.
 
-	for bedroom in bedrooms:
-		bedroomsDF.append(bedroom.text)
+			for buildtype in buildtypes:
+				buildtypesDF.append(buildtype.text)
 
-	# Clean tags from bathrooms data.
+			# Clean tags from bedrooms data.
 
-	for bathroom in bathrooms:
-		bathroomsDF.append(bathroom.text)
+			for bedroom in bedrooms:
+				bedroomsDF.append(bedroom.text)
 
-	# Write to dataframe, then to CSV file.
+			# Clean tags from bathrooms data.
 
-	df = pd.DataFrame(list(zip(*[addressDF, priceDF, buildtypesDF, bedroomsDF, bathroomsDF, urls])))
-	df.columns = ['Addresses', 'Prices', 'Building_Type', 'Bedrooms', 'Bathrooms', 'URLs']
+			for bathroom in bathrooms:
+				bathroomsDF.append(bathroom.text)
 
-	# This routine removes all starting and ending whitepace from dataframe.
-	cols = df.select_dtypes(['object']).columns
-	df[cols] = df[cols].apply(lambda x: x.str.strip())
+			# Write to dataframe, then to CSV file.
+			df = pd.DataFrame(list(zip(*[addressDF, priceDF, buildtypesDF, bedroomsDF, bathroomsDF, urls])))
+			df.columns = ['Addresses', 'Prices', 'Building_Type', 'Bedrooms', 'Bathrooms', 'URLs']
 
-	# Remove all non-numeric characters from prices column.
-	df['Prices'] = df.Prices.str.replace(r"[a-zA-Z:!@]",'')
+			# This routine removes all starting and ending whitepace from dataframe.
+			cols = df.select_dtypes(['object']).columns
+			df[cols] = df[cols].apply(lambda x: x.str.strip())
 
-# Write dataframe to csv file for archive, with datestamp and iteration count.
+			# Remove all non-numeric characters from prices column.
+			df['Prices'] = df.Prices.str.replace(r"[a-zA-Z:!@]",'')
 
-	# df.to_csv('real_estate_data ' + date + '.csv')
-	sep=','
-	df.to_csv('real_estate_data.csv', mode='a', index=False, sep=sep, header=False)
-	# print('File Saved: ' + 'real_estate_data ' + date + '.csv')
+			# Write dataframe to csv file for archive, with datestamp and iteration count.
+			sep=','
+			df.to_csv('real_estate_data.csv', mode='a', index=False, sep=sep, header=False)
+		except Exception as e: print('Error: Failed to execute'), print(e)
+
+def main():
+	# Instantiating the class:
+	webscraper = WebScraper('http://www.target-url.com/')
+	# Call the function rename.
+	scrape_pages = webscraper.scrape_pages()
 	print('File updated sucessfully')
-	
-	print('All done :)')
 
-except Exception as e: print('Error: Failed to execute'), print(e)
+if __name__ == '__main__':
+    main()
